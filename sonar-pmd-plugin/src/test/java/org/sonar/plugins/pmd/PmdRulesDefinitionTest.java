@@ -44,7 +44,8 @@ class PmdRulesDefinitionTest {
         assertThat(repository.language()).isEqualTo(PmdConstants.LANGUAGE_KEY);
 
         List<Rule> rules = repository.rules();
-        assertThat(rules).hasSize(268);
+        // add ali p3c rules
+        assertThat(rules).hasSize(324);
 
         for (Rule rule : rules) {
             assertThat(rule.key()).isNotNull();

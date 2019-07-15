@@ -1,0 +1,10 @@
+If the return type is primitive, return a value of wrapper class may cause NullPointerException
+
+<p>Look for qualified this usages in the same class.</p>
+<p>Examples:</p>
+<pre>
+    public int method() {
+        Integer a = null;
+        return a;
+    }
+</pre>

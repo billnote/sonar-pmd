@@ -1,0 +1,26 @@
+All enumeration type fields should be commented as Javadoc style.
+
+<p>Look for qualified this usages in the same class.</p>
+<p>Examples:</p>
+<pre>
+    public enum TestEnum {
+        /**
+         * agree
+         */
+        agree("agree"),
+        /**
+         * reject
+         */
+        reject("reject");
+
+        private String action;
+
+        TestEnum(String action) {
+            this.action = action;
+        }
+
+        public String getAction() {
+            return action;
+        }
+    }
+</pre>

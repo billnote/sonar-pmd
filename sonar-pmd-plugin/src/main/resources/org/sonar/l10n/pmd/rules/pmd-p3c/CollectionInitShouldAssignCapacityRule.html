@@ -1,0 +1,11 @@
+Note:HashMap does not set the size of the capacity, with the elements continue to increase, the capacity is often forced to expand, resize the need to rebuild the hash table, seriously affecting performance.
+
+<p>Look for qualified this usages in the same class.</p>
+<p>Examples:</p>
+<pre>
+    Negative example:
+    Map<String, String> map = new HashMap<String, String>();
+
+    Positive example:
+    Map<String, String> map = new HashMap<String, String>(16);
+</pre>

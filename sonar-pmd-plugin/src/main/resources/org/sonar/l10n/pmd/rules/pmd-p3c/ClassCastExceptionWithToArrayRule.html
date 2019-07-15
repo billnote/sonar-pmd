@@ -1,0 +1,11 @@
+Do not use toArray method without arguments. Since the return type is Object[], ClassCastException will be thrown when casting it to a different array type.
+
+<p>Look for qualified this usages in the same class.</p>
+<p>Examples:</p>
+<pre>
+    Negative example:
+    Integer[] a = (Integer [])c.toArray();
+
+    Positive example：
+    Integer[] b = (Integer [])c.toArray(new Integer[c.size()]);
+</pre>

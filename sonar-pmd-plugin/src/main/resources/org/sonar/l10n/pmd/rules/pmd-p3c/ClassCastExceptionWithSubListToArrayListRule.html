@@ -1,0 +1,14 @@
+Note:Do not cast, if you have to do, please use new Conllection(sublist result).
+
+<p>Look for qualified this usages in the same class.</p>
+<p>Examples:</p>
+<pre>
+    Negative example:
+    List<String> list = new ArrayList<String>();
+    list.add("22");
+    //warn
+    List<String> test = (ArrayList<String>) list.subList(0, 1);
+
+    Positive example:
+    List<String> list2 = new ArrayList<String>(list.subList(0, 1));
+</pre>

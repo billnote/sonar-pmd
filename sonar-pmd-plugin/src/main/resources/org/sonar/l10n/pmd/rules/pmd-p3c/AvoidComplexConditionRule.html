@@ -1,0 +1,16 @@
+Note: Logic within many if statements are very complicated. Readers need to analyze the final results of the conditional expression to decide what statement is to be executed in certain conditions.
+
+<p>Look for qualified this usages in the same class.</p>
+<p>Examples:</p>
+<pre>
+    Negative example:
+    if ((file.open(fileName, "w") != null) && (...) || (...)) {
+        // ...
+    }
+
+    Positive example:
+    boolean existed = (file.open(fileName, "w") != null) && (...) || (...);
+    if (existed) {
+        //...
+    }
+</pre>

@@ -1,0 +1,20 @@
+We can call the toString method in a POJO directly to print property values in order to check the problem when a method throws an exception in runtime.
+
+<p>Look for qualified this usages in the same class.</p>
+<p>Examples:</p>
+<pre>
+    public class ToStringDemo extends Super{
+        private String secondName;
+        @Override
+        public String toString() {
+            return super.toString() + "ToStringDemo{" + "secondName='" + secondName + '\'' + '}';
+        }
+    }
+    class Super {
+        private String firstName;
+        @Override
+        public String toString() {
+            return "Super{" + "firstName=" + firstName + '\'' + '}';
+        }
+    }
+</pre>

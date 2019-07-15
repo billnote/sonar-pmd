@@ -1,0 +1,13 @@
+Note: Using thread pool can reduce the time of creating and destroying thread and save system resource. If we do not use thread pools, lots of similar threads will be created which lead to "running out of memory" or over-switching problems.
+
+<p>Look for qualified this usages in the same class.</p>
+<p>Examples:</p>
+<pre>
+    ThreadFactory namedThreadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("demo-pool-%d").build();
+    ExecutorService singleThreadPool = new ThreadPoolExecutor(1, 1,
+        0L, TimeUnit.MILLISECONDS,
+        new LinkedBlockingQueue<Runnable>(1024), namedThreadFactory, new ThreadPoolExecutor.AbortPolicy());
+    singleThreadPool.execute(()-> System.out.println(Thread.currentThread().getName()));
+    singleThreadPool.shutdown();
+</pre>
