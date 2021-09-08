@@ -1,7 +1,7 @@
 /*
  * SonarQube PMD Plugin
- * Copyright (C) 2012-2019 SonarSource SA
- * mailto:info AT sonarsource DOT com
+ * Copyright (C) 2012-2021 SonarSource SA and others
+ * mailto:jens AT gerdes DOT digital
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,6 @@ package org.sonar.plugins.pmd.rule;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 

@@ -1,7 +1,7 @@
 /*
  * SonarQube PMD Plugin
- * Copyright (C) 2012-2019 SonarSource SA
- * mailto:info AT sonarsource DOT com
+ * Copyright (C) 2012-2021 SonarSource SA and others
+ * mailto:jens AT gerdes DOT digital
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,6 @@
  */
 package org.sonar.plugins.pmd;
 
-import java.io.File;
-
 import net.sourceforge.pmd.Rule;
 import net.sourceforge.pmd.RuleViolation;
 import org.junit.jupiter.api.Test;
@@ -36,11 +34,13 @@ import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
 
+import java.io.File;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class PmdViolationRecorderTest {
@@ -49,7 +49,7 @@ class PmdViolationRecorderTest {
     private final ActiveRules mockActiveRules = mock(ActiveRules.class);
     private final SensorContext mockContext = mock(SensorContext.class);
 
-    private final PmdViolationRecorder pmdViolationRecorder = new PmdViolationRecorder(spiedFs, mockActiveRules);
+    private final PmdViolationRecorder subject = new PmdViolationRecorder(spiedFs, mockActiveRules);
 
     @Test
     void should_convert_pmd_violation_to_sonar_violation() {
@@ -71,7 +71,7 @@ class PmdViolationRecorderTest {
         when(issueLocation.at(any(TextRange.class))).thenReturn(issueLocation);
 
         // when
-        pmdViolationRecorder.saveViolation(pmdViolation, mockContext);
+        subject.saveViolation(pmdViolation, mockContext);
 
         // then
         verify(mockContext).newIssue();
@@ -86,11 +86,11 @@ class PmdViolationRecorderTest {
         final RuleViolation pmdViolation = createPmdViolation(unknownFile, "RULE");
 
         // when
-        pmdViolationRecorder.saveViolation(pmdViolation, mockContext);
+        subject.saveViolation(pmdViolation, mockContext);
 
         // then
-        verifyZeroInteractions(mockActiveRules);
-        verifyZeroInteractions(mockContext);
+        verifyNoMoreInteractions(mockActiveRules);
+        verifyNoMoreInteractions(mockContext);
         verify(spiedFs).inputFile(any(FilePredicate.class));
     }
 
@@ -106,13 +106,13 @@ class PmdViolationRecorderTest {
         final RuleKey expectedRuleKey2 = RuleKey.of(PmdConstants.REPOSITORY_KEY, ruleName);
 
         // when
-        pmdViolationRecorder.saveViolation(pmdViolation, mockContext);
+        subject.saveViolation(pmdViolation, mockContext);
 
         // then
         verify(spiedFs).inputFile(any(FilePredicate.class));
         verify(mockActiveRules).find(expectedRuleKey1);
         verify(mockActiveRules).find(expectedRuleKey2);
-        verifyZeroInteractions(mockContext);
+        verifyNoMoreInteractions(mockContext);
     }
 
     private DefaultInputFile addToFileSystem(File file) {
@@ -137,7 +137,7 @@ class PmdViolationRecorderTest {
         final RuleViolation pmdViolation = mock(RuleViolation.class);
 
         when(rule.getName()).thenReturn(ruleName);
-        when(pmdViolation.getFilename()).thenReturn(file.toURI().toString());
+        when(pmdViolation.getFilename()).thenReturn(file.getAbsolutePath());
         when(pmdViolation.getBeginLine()).thenReturn(2);
         when(pmdViolation.getDescription()).thenReturn("Description");
         when(pmdViolation.getRule()).thenReturn(rule);

@@ -1,7 +1,7 @@
 /*
  * SonarQube PMD Plugin
- * Copyright (C) 2012-2019 SonarSource SA
- * mailto:info AT sonarsource DOT com
+ * Copyright (C) 2012-2021 SonarSource SA and others
+ * mailto:jens AT gerdes DOT digital
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,13 +19,6 @@
  */
 package org.sonar.plugins.pmd;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
 import net.sourceforge.pmd.Report;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,14 +27,20 @@ import org.junit.jupiter.api.Test;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.config.internal.MapSettings;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.regex.Pattern;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class PmdConfigurationTest {
 
+    private static final Pattern PMD_XML_PATTERN = Pattern.compile("^<\\?xml version=\"1\\.0\" encoding=\"UTF-8\"\\?><pmd xmlns=\"http://pmd\\.sourceforge\\.net/report/2\\.0\\.0\" xmlns:xsi=\"http://www\\.w3\\.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://pmd\\.sourceforge\\.net/report/2\\.0\\.0 http://pmd\\.sourceforge\\.net/report_2_0_0.xsd\" version=\"6\\.\\d+\\.\\d+\".*></pmd>$");
     private static final File WORK_DIR = new File("test-work-dir");
 
     private final FileSystem fs = mock(FileSystem.class);
@@ -101,9 +100,10 @@ class PmdConfigurationTest {
         Path reportFile = configuration.dumpXmlReport(new Report());
 
         assertThat(reportFile.toFile()).isEqualTo(new File(WORK_DIR, "pmd-result.xml"));
-        List<String> writtenLines = Files.readAllLines(reportFile, StandardCharsets.UTF_8);
-        assertThat(writtenLines).hasSize(6);
-        assertThat(writtenLines.get(1)).contains("<pmd");
+        String pmdResultXML = String.join("", Files.readAllLines(reportFile, StandardCharsets.UTF_8));
+
+        assertThat(pmdResultXML)
+                .matches(PMD_XML_PATTERN);
     }
 
     @Test
@@ -124,6 +124,6 @@ class PmdConfigurationTest {
         Path reportFile = configuration.dumpXmlReport(new Report());
 
         assertThat(reportFile).isNull();
-        verifyZeroInteractions(fs);
+        verifyNoMoreInteractions(fs);
     }
 }

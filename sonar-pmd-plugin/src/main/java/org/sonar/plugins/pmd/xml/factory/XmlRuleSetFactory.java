@@ -1,7 +1,7 @@
 /*
  * SonarQube PMD Plugin
- * Copyright (C) 2012-2019 SonarSource SA
- * mailto:info AT sonarsource DOT com
+ * Copyright (C) 2012-2021 SonarSource SA and others
+ * mailto:jens AT gerdes DOT digital
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,11 +19,6 @@
  */
 package org.sonar.plugins.pmd.xml.factory;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.List;
-import javax.annotation.Nullable;
-
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -35,14 +30,18 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.pmd.xml.PmdProperty;
 import org.sonar.plugins.pmd.xml.PmdRule;
 import org.sonar.plugins.pmd.xml.PmdRuleSet;
-import org.sonar.plugins.pmd.xml.PmdRuleSets;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.List;
 
 /**
  * Factory class to create {@link org.sonar.plugins.pmd.xml.PmdRuleSet} out of XML.
  */
 public class XmlRuleSetFactory implements RuleSetFactory {
 
-    private static final Logger LOG = Loggers.get(PmdRuleSets.class);
+    private static final Logger LOG = Loggers.get(XmlRuleSetFactory.class);
     private static final String INVALID_INPUT = "The PMD configuration file is not valid";
 
     private final Reader source;

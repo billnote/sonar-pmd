@@ -17,40 +17,37 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonar.plugins.pmd.xml;
+package org.sonar.plugins.pmd;
 
-public class PmdProperty {
+import net.sourceforge.pmd.util.datasource.DataSource;
+import org.sonar.api.batch.fs.InputFile;
 
-    private String name;
-    private String value;
-    private String cdataValue;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 
-    public PmdProperty(String name, String value) {
-        this.name = name;
-        this.value = value;
+public class ProjectDataSource implements DataSource {
+
+    private final InputFile inputFile;
+
+    public ProjectDataSource(InputFile inputFile) {
+        this.inputFile = inputFile;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return inputFile.inputStream();
     }
 
-    public String getValue() {
-        return value;
+    @Override
+    public String getNiceFileName(boolean shortNames, String inputFileName) {
+        return Paths.get(inputFile.uri())
+                .toAbsolutePath()
+                .toString();
     }
 
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getCdataValue() {
-        return cdataValue;
-    }
-
-    public boolean isCdataValue() {
-        return cdataValue != null;
-    }
-
-    public void setCdataValue(String cdataValue) {
-        this.cdataValue = cdataValue;
+    @Override
+    public void close() throws IOException {
+        // empty default implementation
     }
 }

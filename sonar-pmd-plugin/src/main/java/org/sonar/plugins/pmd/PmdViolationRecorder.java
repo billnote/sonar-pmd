@@ -1,7 +1,7 @@
 /*
  * SonarQube PMD Plugin
- * Copyright (C) 2012-2019 SonarSource SA
- * mailto:info AT sonarsource DOT com
+ * Copyright (C) 2012-2021 SonarSource SA and others
+ * mailto:jens AT gerdes DOT digital
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 package org.sonar.plugins.pmd;
-
-import java.net.URI;
 
 import net.sourceforge.pmd.RuleViolation;
 import org.sonar.api.batch.ScannerSide;
@@ -72,9 +70,10 @@ public class PmdViolationRecorder {
     }
 
     private InputFile findResourceFor(RuleViolation violation) {
-        final URI uri = URI.create(violation.getFilename());
         return fs.inputFile(
-                fs.predicates().hasURI(uri)
+                fs.predicates().hasAbsolutePath(
+                        violation.getFilename()
+                )
         );
     }
 

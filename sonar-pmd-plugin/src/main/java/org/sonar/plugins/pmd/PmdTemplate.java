@@ -1,7 +1,7 @@
 /*
  * SonarQube PMD Plugin
- * Copyright (C) 2012-2019 SonarSource SA
- * mailto:info AT sonarsource DOT com
+ * Copyright (C) 2012-2021 SonarSource SA and others
+ * mailto:jens AT gerdes DOT digital
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,22 +19,20 @@
  */
 package org.sonar.plugins.pmd;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-
+import net.sourceforge.pmd.PMD;
 import net.sourceforge.pmd.PMDConfiguration;
-import net.sourceforge.pmd.PMDException;
-import net.sourceforge.pmd.RuleContext;
-import net.sourceforge.pmd.RuleSets;
-import net.sourceforge.pmd.SourceCodeProcessor;
+import net.sourceforge.pmd.Report;
+import net.sourceforge.pmd.RuleSet;
 import net.sourceforge.pmd.lang.LanguageVersion;
 import net.sourceforge.pmd.lang.java.JavaLanguageModule;
+import net.sourceforge.pmd.renderers.EmptyRenderer;
+import net.sourceforge.pmd.util.datasource.DataSource;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
+
+import java.nio.charset.Charset;
+import java.util.*;
 
 public class PmdTemplate {
 
@@ -49,22 +47,17 @@ public class PmdTemplate {
         versions.put("6", "1.6");
         versions.put("7", "1.7");
         versions.put("8", "1.8");
-        versions.put("9", "9");
         versions.put("1.9", "9");
-        versions.put("10", "10");
         versions.put("1.10", "10");
-        versions.put("11", "11");
         versions.put("1.11", "11");
 
         return versions;
     }
 
-    private SourceCodeProcessor processor;
-    private PMDConfiguration configuration;
+    private final PMDConfiguration configuration;
 
-    PmdTemplate(PMDConfiguration configuration, SourceCodeProcessor processor) {
+    PmdTemplate(PMDConfiguration configuration) {
         this.configuration = configuration;
-        this.processor = processor;
     }
 
     public static PmdTemplate create(String javaVersion, ClassLoader classloader, Charset charset) {
@@ -72,8 +65,11 @@ public class PmdTemplate {
         configuration.setDefaultLanguageVersion(languageVersion(javaVersion));
         configuration.setClassLoader(classloader);
         configuration.setSourceEncoding(charset.name());
-        SourceCodeProcessor processor = new SourceCodeProcessor(configuration);
-        return new PmdTemplate(configuration, processor);
+        configuration.setFailOnViolation(false);
+        configuration.setIgnoreIncrementalAnalysis(true);
+        configuration.setReportFormat(EmptyRenderer.NAME);
+
+        return new PmdTemplate(configuration);
     }
 
     static LanguageVersion languageVersion(String javaVersion) {
@@ -94,13 +90,20 @@ public class PmdTemplate {
         return configuration;
     }
 
-    public void process(InputFile file, RuleSets rulesets, RuleContext ruleContext) {
-        ruleContext.setSourceCodeFilename(file.uri().toString());
+    private Collection<DataSource> toDataSources(Iterable<InputFile> files) {
+        final Collection<DataSource> dataSources = new ArrayList<>();
 
-        try (InputStream inputStream = file.inputStream()) {
-            processor.processSourceCode(inputStream, rulesets, ruleContext);
-        } catch (RuntimeException | IOException | PMDException e) {
-            LOG.error("Fail to execute PMD. Following file is ignored: " + file, e);
-        }
+        files.forEach(file -> dataSources.add(new ProjectDataSource(file)));
+
+        return dataSources;
+    }
+
+    public Report process(Iterable<InputFile> files, RuleSet ruleset) {
+        return PMD.processFiles(
+                configuration,
+                Collections.singletonList(ruleset),
+                toDataSources(files),
+                Collections.emptyList()
+        );
     }
 }

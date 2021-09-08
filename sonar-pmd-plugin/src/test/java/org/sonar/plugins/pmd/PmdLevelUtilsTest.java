@@ -1,7 +1,7 @@
 /*
  * SonarQube PMD Plugin
- * Copyright (C) 2012-2019 SonarSource SA
- * mailto:info AT sonarsource DOT com
+ * Copyright (C) 2012-2021 SonarSource SA and others
+ * mailto:jens AT gerdes DOT digital
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 package org.sonar.plugins.pmd;
-
-import java.lang.reflect.Constructor;
 
 import org.junit.jupiter.api.Test;
 
@@ -49,13 +47,5 @@ class PmdLevelUtilsTest {
         assertThat(PmdLevelUtils.toLevel(MAJOR)).isEqualTo(3);
         assertThat(PmdLevelUtils.toLevel(MINOR)).isEqualTo(4);
         assertThat(PmdLevelUtils.toLevel(INFO)).isEqualTo(5);
-    }
-
-    @Test
-    void private_constructor() throws Exception {
-        Constructor constructor = PmdLevelUtils.class.getDeclaredConstructor();
-        assertThat(constructor.isAccessible()).isFalse();
-        constructor.setAccessible(true);
-        constructor.newInstance();
     }
 }

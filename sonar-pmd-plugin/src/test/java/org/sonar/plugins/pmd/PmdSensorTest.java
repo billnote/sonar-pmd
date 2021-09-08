@@ -1,7 +1,7 @@
 /*
  * SonarQube PMD Plugin
- * Copyright (C) 2012-2019 SonarSource SA
- * mailto:info AT sonarsource DOT com
+ * Copyright (C) 2012-2021 SonarSource SA and others
+ * mailto:jens AT gerdes DOT digital
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,9 +20,8 @@
 package org.sonar.plugins.pmd;
 
 import java.io.File;
-import java.util.Iterator;
+import java.util.Arrays;
 
-import com.google.common.collect.Iterators;
 import net.sourceforge.pmd.Report;
 import net.sourceforge.pmd.RuleViolation;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +43,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class PmdSensorTest {
@@ -57,20 +56,9 @@ class PmdSensorTest {
 
     private PmdSensor pmdSensor;
 
-    private static RuleViolation violation() {
-        return mock(RuleViolation.class);
-    }
-
-    private static Report report(RuleViolation... violations) {
-        Report report = mock(Report.class);
-        when(report.iterator()).thenReturn(Iterators.forArray(violations));
-        return report;
-    }
-
     @BeforeEach
     void setUpPmdSensor() {
         pmdSensor = new PmdSensor(profile, executor, pmdViolationRecorder, fs);
-        when(executor.execute()).thenReturn(mock(Report.class));
     }
 
     @Test
@@ -135,8 +123,7 @@ class PmdSensorTest {
         // given
         addOneJavaFile(Type.MAIN);
         final RuleViolation pmdViolation = violation();
-        final Report report = report(pmdViolation);
-        when(executor.execute()).thenReturn(report);
+        mockExecutorResult(pmdViolation);
 
         // when
         pmdSensor.execute(sensorContext);
@@ -149,32 +136,28 @@ class PmdSensorTest {
     void should_not_report_zero_violation() {
 
         // given
-        final Report report = report();
-        when(executor.execute()).thenReturn(report);
+        mockExecutorResult();
 
         // when
         pmdSensor.execute(sensorContext);
 
         // then
         verify(pmdViolationRecorder, never()).saveViolation(any(RuleViolation.class), eq(sensorContext));
-        verifyZeroInteractions(sensorContext);
+        verifyNoMoreInteractions(sensorContext);
     }
 
     @Test
     void should_not_report_invalid_violation() {
 
         // given
-        final RuleViolation pmdViolation = violation();
-        final Report report = report(pmdViolation);
-        when(executor.execute()).thenReturn(report);
-        when(report.iterator()).thenReturn(Iterators.forArray(pmdViolation));
+        mockExecutorResult(violation());
 
         // when
         pmdSensor.execute(sensorContext);
 
         // then
         verify(pmdViolationRecorder, never()).saveViolation(any(RuleViolation.class), eq(sensorContext));
-        verifyZeroInteractions(sensorContext);
+        verifyNoMoreInteractions(sensorContext);
     }
 
     @Test
@@ -216,19 +199,21 @@ class PmdSensorTest {
         verify(mockDescriptor).name("PmdSensor");
     }
 
-    @SuppressWarnings("unchecked")
-    private void mockEmptyReport() {
-        final Report mockReport = mock(Report.class);
-        final Iterator<RuleViolation> iterator = mock(Iterator.class);
+    private static RuleViolation violation() {
+        return mock(RuleViolation.class);
+    }
 
-        when(mockReport.iterator()).thenReturn(iterator);
-        when(iterator.hasNext()).thenReturn(false);
+    private void mockExecutorResult(RuleViolation... violations) {
+        final Report report = new Report();
+        Arrays.stream(violations)
+                .forEach(report::addRuleViolation);
 
-        when(executor.execute()).thenReturn(mockReport);
+        when(executor.execute())
+                .thenReturn(report);
     }
 
     private void addOneJavaFile(Type type) {
-        mockEmptyReport();
+        mockExecutorResult();
         File file = new File("x");
         fs.add(
                 TestInputFileBuilder.create(
